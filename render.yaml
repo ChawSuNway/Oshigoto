@@ -1,4 +1,4 @@
-# Render Blueprint â€” https://render.com/docs/blueprint-spec
+# Render Blueprint â€? https://render.com/docs/blueprint-spec
 # Deploy: Render Dashboard -> New -> Blueprint -> pick this repo.
 # Values marked "sync: false" are secrets you set in the dashboard.
 services:
@@ -27,9 +27,9 @@ services:
       # Set to "true" for the FIRST deploy to create the admin user + departments,
       # then change it back to "false" (re-seeding resets seeded passwords).
       - key: RUN_SEED
-        value: "false"
+        value: "true"
 
-      # --- Database (TiDB Cloud Serverless â€” MySQL compatible) ---------------
+      # --- Database (TiDB Cloud Serverless â€? MySQL compatible) ---------------
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST            # gatewayXX.<region>.prod.aws.tidbcloud.com
@@ -53,6 +53,6 @@ services:
       - key: QUEUE_CONNECTION
         value: database
 
-      # --- Mail (optional â€” set these to send real e-mail) ------------------
+      # --- Mail (optional â€? set these to send real e-mail) ------------------
       - key: MAIL_MAILER
         value: log
