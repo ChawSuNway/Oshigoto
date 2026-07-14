@@ -1,0 +1,37 @@
+# Version control & CI
+.git
+.gitignore
+.gitattributes
+.github
+
+# Dependencies / build output (installed or generated inside the image)
+node_modules
+vendor
+public/build
+public/hot
+
+# Environment & secrets — provide these at runtime, never bake them in
+.env
+.env.*
+!.env.example
+auth.json
+
+# Local runtime data
+storage/logs/*.log
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*.php
+database/*.sqlite
+
+# Tooling / editor / OS noise
+.vscode
+.idea
+.fleet
+.phpunit.result.cache
+Dockerfile
+.dockerignore
+docker-compose*.yml
+README.md
+npm-debug.log*
+yarn-error.log
+tests

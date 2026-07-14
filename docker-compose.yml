@@ -1,0 +1,56 @@
+services:
+  app:
+    build:
+      context: .
+    image: oshigoto:latest
+    restart: unless-stopped
+    ports:
+      - "8080:10000"
+    environment:
+      APP_NAME: Oshigoto
+      APP_ENV: production
+      APP_DEBUG: "false"
+      # Generate once with: docker compose run --rm app php artisan key:generate --show
+      APP_KEY: "${APP_KEY:-}"
+      APP_URL: "http://localhost:8080"
+      APP_TIMEZONE: Asia/Yangon
+
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: daily_work_report
+      DB_USERNAME: oshigoto
+      DB_PASSWORD: secret
+
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+
+      # Run migrations automatically on container start.
+      RUN_MIGRATIONS: "true"
+    volumes:
+      # Persist uploaded/generated files across container restarts.
+      - app_storage:/var/www/html/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: daily_work_report
+      MYSQL_USER: oshigoto
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: rootsecret
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  app_storage:
+  mysql_data:

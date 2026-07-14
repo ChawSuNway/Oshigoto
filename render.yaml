@@ -1,0 +1,54 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Deploy: Render Dashboard -> New -> Blueprint -> pick this repo.
+# Values marked "sync: false" are secrets you set in the dashboard.
+services:
+  - type: web
+    name: oshigoto
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    autoDeploy: true
+    envVars:
+      - key: APP_NAME
+        value: Oshigoto
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY            # paste the generated base64:... key
+        sync: false
+      - key: APP_URL            # e.g. https://oshigoto.onrender.com
+        sync: false
+      - key: APP_TIMEZONE
+        value: Asia/Yangon
+      - key: LOG_CHANNEL
+        value: stderr
+
+      # --- Database (TiDB Cloud Serverless — MySQL compatible) ---------------
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST            # gatewayXX.<region>.prod.aws.tidbcloud.com
+        sync: false
+      - key: DB_PORT
+        value: "4000"           # TiDB uses 4000 (Aiven/others: 3306 / provider port)
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME        # e.g. xxxxxxx.root
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: MYSQL_ATTR_SSL_CA  # system CA bundle (baked into the image)
+        value: /etc/ssl/certs/ca-certificates.crt
+
+      # --- Driven by the database (sessions/cache/queue live in MySQL) -------
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+
+      # --- Mail (optional — set these to send real e-mail) ------------------
+      - key: MAIL_MAILER
+        value: log
