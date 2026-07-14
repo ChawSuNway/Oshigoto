@@ -54,4 +54,7 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
 # Render provides $PORT (defaults to 10000). Config/route/view caches are built
 # at startup so Render's environment variables are respected, then the app runs.
 EXPOSE 10000
-CMD ["sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force || true; php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
+# Startup: cache config/routes/views against the runtime env, always run pending
+# migrations, seed only when RUN_SEED=true (set it once for the first deploy),
+# then serve on Render's $PORT.
+CMD ["sh", "-c", "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force || true; [ \"${RUN_SEED:-false}\" = \"true\" ] && php artisan db:seed --force || true; php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]

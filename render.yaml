@@ -24,6 +24,10 @@ services:
         value: Asia/Yangon
       - key: LOG_CHANNEL
         value: stderr
+      # Set to "true" for the FIRST deploy to create the admin user + departments,
+      # then change it back to "false" (re-seeding resets seeded passwords).
+      - key: RUN_SEED
+        value: "false"
 
       # --- Database (TiDB Cloud Serverless — MySQL compatible) ---------------
       - key: DB_CONNECTION
