@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none !important;
+}
+
+/* Client-side validation: highlight fields the user has touched that are invalid. */
+.cv-invalid,
+.cv-invalid:focus {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 1px #ef4444 !important;
+}
+
+/* ---- Material Design (classic) ---- */
+/* Ripple effect for buttons / clickable surfaces. */
+.md-ripple {
+    position: relative;
+    overflow: hidden;
+}
+.md-ripple-ink {
+    position: absolute;
+    border-radius: 9999px;
+    background-color: currentColor;
+    opacity: 0.3;
+    transform: scale(0);
+    pointer-events: none;
+    animation: md-ripple-anim 0.6s linear;
+}
+@keyframes md-ripple-anim {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Material snackbar (toast). */
+.snackbar {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 60;
+    max-width: 90vw;
+    transform: translateX(-50%) translateY(20px);
+    background-color: #323232;
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.snackbar.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
