@@ -102,7 +102,7 @@
                         <div>
                             <x-input-label for="to_emails" value="To" />
                             <x-text-input id="to_emails" name="to_emails" type="text" class="mt-1 block w-full"
-                                          :value="old('to_emails', is_array($early->to_emails) ? implode(', ', $early->to_emails) : $early->to_emails)"
+                                          :value="implode(', ', (array) old('to_emails', $early->to_emails))"
                                           placeholder="e.g. manager@example.com, teamlead@example.com" />
                             <p class="mt-1 text-xs text-gray-500">Separate multiple addresses with commas. At least one address is required.</p>
                             <x-input-error :messages="$errors->get('to_emails')" class="mt-2" />
@@ -114,7 +114,7 @@
                         <div>
                             <x-input-label for="cc_emails" value="CC (optional)" />
                             <x-text-input id="cc_emails" name="cc_emails" type="text" class="mt-1 block w-full"
-                                          :value="old('cc_emails', is_array($early->cc_emails) ? implode(', ', $early->cc_emails) : $early->cc_emails)"
+                                          :value="implode(', ', (array) old('cc_emails', $early->cc_emails))"
                                           placeholder="e.g. hr@example.com" />
                             <p class="mt-1 text-xs text-gray-500">Separate multiple addresses with commas.</p>
                             <x-input-error :messages="$errors->get('cc_emails')" class="mt-2" />
