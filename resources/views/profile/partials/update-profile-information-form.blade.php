@@ -1,3 +1,7 @@
+@php
+    $departmentOptions = \App\Models\Department::orderBy('name')->pluck('name');
+@endphp
+
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
@@ -31,7 +35,14 @@
 
         <div>
             <x-input-label for="department_name" :value="__('Department (部署名)')" />
-            <x-text-input id="department_name" name="department_name" type="text" class="mt-1 block w-full" :value="old('department_name', $user->department_name)" required autocomplete="off" placeholder="例：開発部" />
+            @php ($currentDept = old('department_name', $user->department_name))
+            <select id="department_name" name="department_name" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <option value="">--- Select Department ---</option>
+                @foreach ($departmentOptions as $dept)
+                    <option value="{{ $dept }}" @selected($currentDept === $dept)>{{ $dept }}</option>
+                @endforeach
+            </select>
             <x-input-error class="mt-2" :messages="$errors->get('department_name')" />
         </div>
 

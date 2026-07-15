@@ -1,3 +1,9 @@
+@php
+    $departmentOptions = \App\Models\Department::orderBy('name')->pluck('name');
+    // Lock the Japanese name only when the profile already has one.
+    $jpLocked = filled(auth()->user()->japanese_name);
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -14,7 +20,7 @@
                  x-data="{
                     englishName: @js(old('english_name', $early->english_name)),
                     japaneseName: @js(old('japanese_name', $early->japanese_name)),
-                    department: @js(old('department_name', $early->department_name)),
+                    department: @js(old('department_name', $departmentOptions->contains($early->department_name) ? $early->department_name : '')),
                     reason: @js(old('reason', $early->reason)),
                     leaveTime: @js(old('leave_time', $early->leave_time)),
                     get subject() { return 'Request for Early Leave application_' + (this.englishName || '[English name]'); },
@@ -51,15 +57,25 @@
 
                         <div>
                             <x-input-label for="japanese_name" value="Japanese Name (氏名)" />
-                            <x-text-input id="japanese_name" name="japanese_name" type="text" class="mt-1 block w-full"
-                                          x-model="japaneseName" required />
+                            <x-text-input id="japanese_name" name="japanese_name" type="text"
+                                          class="mt-1 block w-full {{ $jpLocked ? 'bg-gray-100 text-gray-600' : '' }}"
+                                          x-model="japaneseName" :readonly="$jpLocked" required />
+                            <p class="mt-1 text-xs text-gray-500">
+                                {{ $jpLocked ? 'From your profile — appears in the greeting line.' : 'Enter your Japanese name (氏名) — it appears in the greeting line.' }}
+                            </p>
                             <x-input-error :messages="$errors->get('japanese_name')" class="mt-2" />
                         </div>
 
                         <div class="sm:col-span-2">
                             <x-input-label for="department_name" value="Department（部署名）" />
-                            <x-text-input id="department_name" name="department_name" type="text" class="mt-1 block w-full"
-                                          x-model="department" placeholder="e.g. 開発部" required />
+                            <select id="department_name" name="department_name" x-model="department" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">--- Select Department ---</option>
+                                @foreach ($departmentOptions as $dept)
+                                    <option value="{{ $dept }}">{{ $dept }}</option>
+                                @endforeach
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">Appears in the greeting line.</p>
                             <x-input-error :messages="$errors->get('department_name')" class="mt-2" />
                         </div>
                     </div>

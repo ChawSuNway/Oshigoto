@@ -6,6 +6,8 @@
     $submitLabel = $submitLabel ?? 'Save Application';
     $cancelUrl = $cancelUrl ?? route('leave.index');
     $departmentOptions = \App\Models\Department::orderBy('name')->pluck('name');
+    // Lock the Japanese name only when the profile already has one.
+    $jpLocked = filled($user->japanese_name);
 @endphp
 
 {{--
@@ -100,9 +102,12 @@
 
             <div>
                 <x-input-label for="japanese_name">Japanese Name (&#27663;&#21517;)</x-input-label>
-                <x-text-input id="japanese_name" name="japanese_name" type="text" class="mt-1 block w-full bg-gray-100 text-gray-600"
-                              x-model="japaneseName" readonly required />
-                <p class="mt-1 text-xs text-gray-500">Your name appears in the greeting line.</p>
+                <x-text-input id="japanese_name" name="japanese_name" type="text"
+                              class="mt-1 block w-full {{ $jpLocked ? 'bg-gray-100 text-gray-600' : '' }}"
+                              x-model="japaneseName" :readonly="$jpLocked" required />
+                <p class="mt-1 text-xs text-gray-500">
+                    {{ $jpLocked ? 'From your profile - appears in the greeting line.' : 'Enter your Japanese name - it appears in the greeting line.' }}
+                </p>
                 <x-input-error :messages="$errors->get('japanese_name')" class="mt-2" />
             </div>
 
