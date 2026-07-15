@@ -3,8 +3,10 @@
      class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden"></div>
 
 {{-- Sidebar (full on open, icon-only rail when collapsed on large screens) --}}
-<aside class="fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-white shadow-md-2 overflow-x-hidden transition-all duration-200 ease-in-out lg:z-40"
-       :class="sidebarOpen ? 'translate-x-0 lg:w-64' : '-translate-x-full lg:translate-x-0 lg:w-16'">
+{{-- The static -translate-x-full / lg:translate-x-0 / lg:w-64 match the initial Alpine
+     state (closed on mobile, open on >=lg) so the drawer does not flash on load. --}}
+<aside class="fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-white shadow-md-2 overflow-x-hidden transition-all duration-200 ease-in-out lg:z-40 -translate-x-full lg:translate-x-0 lg:w-64"
+       :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full': ! sidebarOpen, 'lg:w-64': sidebarOpen, 'lg:w-16': ! sidebarOpen }">
 
     {{-- Brand --}}
     <div class="flex items-center gap-2 h-16 px-4 border-b border-gray-100 shrink-0" :class="{ 'lg:justify-center lg:px-2': ! sidebarOpen }">

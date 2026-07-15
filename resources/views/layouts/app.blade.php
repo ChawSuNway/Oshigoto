@@ -24,7 +24,11 @@
             @include('layouts.navigation')
 
             {{-- Content column, offset by the sidebar (full width when open, rail when collapsed) --}}
-            <div class="transition-[padding] duration-200 ease-in-out" :class="sidebarOpen ? 'lg:pl-64' : 'lg:pl-16'">
+            {{-- The static lg:pl-64 matches the initial Alpine state (open on >=lg), so the
+                 content does not jump when Alpine boots. Object syntax is used because it
+                 removes the class again when the sidebar is collapsed. --}}
+            <div class="transition-[padding] duration-200 ease-in-out lg:pl-64"
+                 :class="{ 'lg:pl-64': sidebarOpen, 'lg:pl-16': ! sidebarOpen }">
                 @php
                     $draftCount = (! auth()->user()->isManager())
                         ? auth()->user()->reports()->whereNull('sent_at')->count()
