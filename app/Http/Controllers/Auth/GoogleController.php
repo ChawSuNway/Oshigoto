@@ -58,6 +58,9 @@ class GoogleController extends Controller
                 'email' => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),
                 'avatar' => $googleUser->getAvatar(),
+                // Default password so the account can also sign in with the normal
+                // login form. The "hashed" cast on User hashes this automatically.
+                'password' => 'password',
                 'role' => 'employee',
             ]);
 
