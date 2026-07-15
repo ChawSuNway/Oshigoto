@@ -2,6 +2,24 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+    @if (session('error'))
+        <div class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- Sign in with Google -->
+    <x-google-button label="Sign in with Google" />
+
+    <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+            <div class="w-full border-t border-gray-200"></div>
+        </div>
+        <div class="relative flex justify-center">
+            <span class="bg-white px-3 text-xs uppercase tracking-wider text-gray-400">or</span>
+        </div>
+    </div>
+
     <form method="POST" action="{{ route('login') }}">
         @csrf
 

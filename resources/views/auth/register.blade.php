@@ -1,4 +1,16 @@
 <x-guest-layout>
+    <!-- Register with Google (creates the account and signs you straight in) -->
+    <x-google-button label="Sign up with Google" />
+
+    <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+            <div class="w-full border-t border-gray-200"></div>
+        </div>
+        <div class="relative flex justify-center">
+            <span class="bg-white px-3 text-xs uppercase tracking-wider text-gray-400">or</span>
+        </div>
+    </div>
+
     <form method="POST" action="{{ route('register') }}" data-validate>
         @csrf
 
@@ -18,8 +30,8 @@
 
         <!-- Department -->
         <div class="mt-4">
-            <x-input-label for="department_name" :value="__('Department (部署名)')" />
-            <x-text-input id="department_name" class="block mt-1 w-full" type="text" name="department_name" :value="old('department_name')" required autocomplete="off" placeholder="例：開発部" />
+            <x-input-label for="department_name" :value="__('Department (部署名) — optional')" />
+            <x-text-input id="department_name" class="block mt-1 w-full" type="text" name="department_name" :value="old('department_name')" autocomplete="off" placeholder="例：開発部" />
             <x-input-error :messages="$errors->get('department_name')" class="mt-2" />
         </div>
 

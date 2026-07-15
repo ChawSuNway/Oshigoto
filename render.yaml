@@ -1,4 +1,4 @@
-# Render Blueprint â€? https://render.com/docs/blueprint-spec
+# Render Blueprint ï¿½? https://render.com/docs/blueprint-spec
 # Deploy: Render Dashboard -> New -> Blueprint -> pick this repo.
 # Values marked "sync: false" are secrets you set in the dashboard.
 services:
@@ -27,9 +27,9 @@ services:
       # Set to "true" for the FIRST deploy to create the admin user + departments,
       # then change it back to "false" (re-seeding resets seeded passwords).
       - key: RUN_SEED
-        value: "true"
+        value: "false"
 
-      # --- Database (TiDB Cloud Serverless â€? MySQL compatible) ---------------
+      # --- Database (TiDB Cloud Serverless ï¿½? MySQL compatible) ---------------
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST            # gatewayXX.<region>.prod.aws.tidbcloud.com
@@ -53,6 +53,14 @@ services:
       - key: QUEUE_CONNECTION
         value: database
 
-      # --- Mail (optional â€? set these to send real e-mail) ------------------
+      # --- Mail (optional ï¿½? set these to send real e-mail) ------------------
       - key: MAIL_MAILER
         value: log
+
+      # --- Google sign-in (console.cloud.google.com/apis/credentials) -------
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI   # https://<your-app>.onrender.com/auth/google/callback
+        sync: false

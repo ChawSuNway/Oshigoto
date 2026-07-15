@@ -25,6 +25,8 @@ class User extends Authenticatable
         'department_name',
         'email',
         'password',
+        'google_id',
+        'avatar',
         'role',
         'manager_id',
     ];
