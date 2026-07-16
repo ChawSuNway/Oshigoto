@@ -9,15 +9,32 @@ use Illuminate\Support\Facades\Mail;
 
 class LeaveApplicationController extends Controller
 {
+    use \App\Http\Controllers\Concerns\ListFilters;
+
+    /**
+     * Admins list every user's records; everyone else only their own.
+     */
     public function index(Request $request)
     {
-        $applications = $request->user()->leaveApplications()->latest('from_date')->paginate(15);
+        $query = $this->baseListQuery($request, LeaveApplication::class);
 
-        return view('leave.index', compact('applications'));
+        $this->applyUserFilter($query, $request);
+        $this->applyDepartmentFilter($query, $request);
+        $this->applyDateOverlap($query, $request, 'from_date', 'to_date');
+        $this->applyStatusFilter($query, $request);
+
+        $applications = $query->latest('from_date')->paginate(15)->withQueryString();
+
+        return view('leave.index', array_merge(
+            ['applications' => $applications],
+            $this->filterOptions($request),
+        ));
     }
 
     public function create(Request $request)
     {
+        $this->denyAdminEntry($request);
+
         $user = $request->user();
 
         return view('leave.create', [
@@ -35,6 +52,8 @@ class LeaveApplicationController extends Controller
 
     public function store(Request $request)
     {
+        $this->denyAdminEntry($request);
+
         $leave = $request->user()->leaveApplications()->create($this->validated($request));
 
         return redirect()->route('leave.show', $leave)
@@ -43,7 +62,7 @@ class LeaveApplicationController extends Controller
 
     public function show(Request $request, LeaveApplication $leave)
     {
-        $this->authorizeOwner($request, $leave);
+        $this->authorizeView($request, $leave);
 
         return view('leave.show', [
             'leave'   => $leave,
@@ -152,5 +171,13 @@ class LeaveApplicationController extends Controller
     protected function authorizeOwner(Request $request, LeaveApplication $leave): void
     {
         abort_unless($leave->user_id === $request->user()->id, 403);
+    }
+
+    /** Owners see their own record; admins may review anyone's. */
+    protected function authorizeView(Request $request, LeaveApplication $leave): void
+    {
+        $user = $request->user();
+
+        abort_unless($leave->user_id === $user->id || $user->isAdmin(), 403);
     }
 }

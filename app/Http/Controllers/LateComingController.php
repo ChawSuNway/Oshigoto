@@ -9,15 +9,31 @@ use Illuminate\Support\Facades\Mail;
 
 class LateComingController extends Controller
 {
+    use \App\Http\Controllers\Concerns\ListFilters;
+
+    /**
+     * Admins list every user's records; everyone else only their own.
+     */
     public function index(Request $request)
     {
-        $notices = $request->user()->lateComings()->latest('notice_date')->paginate(15);
+        $query = $this->baseListQuery($request, LateComing::class);
 
-        return view('late.index', compact('notices'));
+        $this->applyUserFilter($query, $request);
+        $this->applyDateRange($query, $request, 'notice_date');
+        $this->applyStatusFilter($query, $request);
+
+        $notices = $query->latest('notice_date')->paginate(15)->withQueryString();
+
+        return view('late.index', array_merge(
+            ['notices' => $notices],
+            $this->filterOptions($request),
+        ));
     }
 
     public function create(Request $request)
     {
+        $this->denyAdminEntry($request);
+
         $user = $request->user();
 
         return view('late.create', [
@@ -34,6 +50,8 @@ class LateComingController extends Controller
 
     public function store(Request $request)
     {
+        $this->denyAdminEntry($request);
+
         $data = $this->validated($request);
 
         $late = $request->user()->lateComings()->create($data);
@@ -44,7 +62,7 @@ class LateComingController extends Controller
 
     public function show(Request $request, LateComing $late)
     {
-        $this->authorizeOwner($request, $late);
+        $this->authorizeView($request, $late);
 
         return view('late.show', [
             'late'    => $late,
@@ -137,5 +155,13 @@ class LateComingController extends Controller
     protected function authorizeOwner(Request $request, LateComing $late): void
     {
         abort_unless($late->user_id === $request->user()->id, 403);
+    }
+
+    /** Owners see their own record; admins may review anyone's. */
+    protected function authorizeView(Request $request, LateComing $late): void
+    {
+        $user = $request->user();
+
+        abort_unless($late->user_id === $user->id || $user->isAdmin(), 403);
     }
 }

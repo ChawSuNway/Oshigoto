@@ -1,29 +1,44 @@
+@php ($isAdmin = auth()->user()->isAdmin())
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Late Coming Notices</h2>
-            <a href="{{ route('late.create') }}"
-               class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent md-ripple rounded font-medium text-sm text-white uppercase tracking-wider shadow-md-1 hover:bg-indigo-700 hover:shadow-md-2">
-                + New Late Notice
-            </a>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ $isAdmin ? 'Late Coming Notices — All Users' : 'Late Coming Notices' }}
+            </h2>
+            @unless ($isAdmin)
+                <a href="{{ route('late.create') }}"
+                   class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent md-ripple rounded font-medium text-sm text-white uppercase tracking-wider shadow-md-1 hover:bg-indigo-700 hover:shadow-md-2">
+                    + New Late Notice
+                </a>
+            @endunless
         </div>
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             @include('partials.flash')
+
+            <x-filter-bar :action="route('late.index')" :users="$users" :departments="null" />
 
             <div class="bg-white overflow-hidden shadow-md-1 sm:rounded-lg">
                 @if ($notices->isEmpty())
                     <div class="p-8 text-center text-gray-500">
-                        No late-coming notices yet.
-                        <a href="{{ route('late.create') }}" class="text-indigo-600 hover:underline">Create one</a>.
+                        No late-coming notices found.
+                        @unless ($isAdmin)
+                            <a href="{{ route('late.create') }}" class="text-indigo-600 hover:underline">Create one</a>.
+                        @endunless
                     </div>
                 @else
+                    <div class="px-6 pt-4 text-xs text-gray-500">{{ $notices->total() }} record(s)</div>
+
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-50 text-left text-gray-500 uppercase text-xs tracking-wider">
                             <tr>
                                 <th class="px-6 py-3">Date</th>
+                                @if ($isAdmin)
+                                    <th class="px-6 py-3">User</th>
+                                @endif
                                 <th class="px-6 py-3">Reason</th>
                                 <th class="px-6 py-3">Late (min)</th>
                                 <th class="px-6 py-3">Status</th>
@@ -34,6 +49,9 @@
                             @foreach ($notices as $notice)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-3 font-medium text-gray-900">{{ $notice->notice_date->format('d-m-Y') }}</td>
+                                    @if ($isAdmin)
+                                        <td class="px-6 py-3 text-gray-700">{{ optional($notice->user)->name ?? '—' }}</td>
+                                    @endif
                                     <td class="px-6 py-3 text-gray-700">{{ $notice->reason }}</td>
                                     <td class="px-6 py-3 text-gray-700">{{ $notice->minutes }}分</td>
                                     <td class="px-6 py-3">

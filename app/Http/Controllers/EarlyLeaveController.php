@@ -9,15 +9,32 @@ use Illuminate\Support\Facades\Mail;
 
 class EarlyLeaveController extends Controller
 {
+    use \App\Http\Controllers\Concerns\ListFilters;
+
+    /**
+     * Admins list every user's records; everyone else only their own.
+     */
     public function index(Request $request)
     {
-        $applications = $request->user()->earlyLeaves()->latest('notice_date')->paginate(15);
+        $query = $this->baseListQuery($request, EarlyLeave::class);
 
-        return view('early.index', compact('applications'));
+        $this->applyUserFilter($query, $request);
+        $this->applyDepartmentFilter($query, $request);
+        $this->applyDateRange($query, $request, 'notice_date');
+        $this->applyStatusFilter($query, $request);
+
+        $applications = $query->latest('notice_date')->paginate(15)->withQueryString();
+
+        return view('early.index', array_merge(
+            ['applications' => $applications],
+            $this->filterOptions($request),
+        ));
     }
 
     public function create(Request $request)
     {
+        $this->denyAdminEntry($request);
+
         $user = $request->user();
 
         return view('early.create', [
@@ -35,6 +52,8 @@ class EarlyLeaveController extends Controller
 
     public function store(Request $request)
     {
+        $this->denyAdminEntry($request);
+
         $data = $this->validated($request);
 
         $early = $request->user()->earlyLeaves()->create($data);
@@ -45,7 +64,7 @@ class EarlyLeaveController extends Controller
 
     public function show(Request $request, EarlyLeave $early)
     {
-        $this->authorizeOwner($request, $early);
+        $this->authorizeView($request, $early);
 
         return view('early.show', [
             'early'   => $early,
@@ -136,5 +155,13 @@ class EarlyLeaveController extends Controller
     protected function authorizeOwner(Request $request, EarlyLeave $early): void
     {
         abort_unless($early->user_id === $request->user()->id, 403);
+    }
+
+    /** Owners see their own record; admins may review anyone's. */
+    protected function authorizeView(Request $request, EarlyLeave $early): void
+    {
+        $user = $request->user();
+
+        abort_unless($early->user_id === $user->id || $user->isAdmin(), 403);
     }
 }

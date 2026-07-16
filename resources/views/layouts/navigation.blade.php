@@ -32,7 +32,7 @@
             <span x-show="sidebarOpen" class="whitespace-nowrap">{{ __('Report List') }}</span>
         </x-sidebar-link>
 
-        @unless (auth()->user()->isManager())
+        @unless (auth()->user()->isManager() || auth()->user()->isAdmin())
             <x-sidebar-link :href="route('reports.create')" title="New Daily Report" :active="request()->routeIs('reports.create')">
                 <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                 <span x-show="sidebarOpen" class="whitespace-nowrap">{{ __('New Report') }}</span>

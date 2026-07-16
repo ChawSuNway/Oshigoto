@@ -9,15 +9,32 @@ use Illuminate\Support\Facades\Mail;
 
 class HalfDayLeaveController extends Controller
 {
+    use \App\Http\Controllers\Concerns\ListFilters;
+
+    /**
+     * Admins list every user's records; everyone else only their own.
+     */
     public function index(Request $request)
     {
-        $applications = $request->user()->halfDayLeaves()->latest('notice_date')->paginate(15);
+        $query = $this->baseListQuery($request, HalfDayLeave::class);
 
-        return view('half.index', compact('applications'));
+        $this->applyUserFilter($query, $request);
+        $this->applyDepartmentFilter($query, $request);
+        $this->applyDateRange($query, $request, 'notice_date');
+        $this->applyStatusFilter($query, $request);
+
+        $applications = $query->latest('notice_date')->paginate(15)->withQueryString();
+
+        return view('half.index', array_merge(
+            ['applications' => $applications],
+            $this->filterOptions($request),
+        ));
     }
 
     public function create(Request $request)
     {
+        $this->denyAdminEntry($request);
+
         $user = $request->user();
 
         return view('half.create', [
@@ -35,6 +52,8 @@ class HalfDayLeaveController extends Controller
 
     public function store(Request $request)
     {
+        $this->denyAdminEntry($request);
+
         $data = $this->validated($request);
 
         $half = $request->user()->halfDayLeaves()->create($data);
@@ -45,7 +64,7 @@ class HalfDayLeaveController extends Controller
 
     public function show(Request $request, HalfDayLeave $half)
     {
-        $this->authorizeOwner($request, $half);
+        $this->authorizeView($request, $half);
 
         return view('half.show', [
             'half'    => $half,
@@ -153,5 +172,13 @@ class HalfDayLeaveController extends Controller
     protected function authorizeOwner(Request $request, HalfDayLeave $half): void
     {
         abort_unless($half->user_id === $request->user()->id, 403);
+    }
+
+    /** Owners see their own record; admins may review anyone's. */
+    protected function authorizeView(Request $request, HalfDayLeave $half): void
+    {
+        $user = $request->user();
+
+        abort_unless($half->user_id === $user->id || $user->isAdmin(), 403);
     }
 }

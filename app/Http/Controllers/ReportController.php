@@ -19,22 +19,42 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ReportController extends Controller
 {
+    use \App\Http\Controllers\Concerns\ListFilters;
+
     /**
-     * List reports. Employees see their own; managers see reports sent to them.
+     * List reports. Admins see every user's; managers see reports sent to them;
+     * employees see their own.
      */
     public function index(Request $request)
     {
         $user = $request->user();
 
-        $reports = $user->isManager()
-            ? $user->receivedReports()->with('user')->latest('report_date')->paginate(15)
-            : $user->reports()->with('manager')->latest('report_date')->paginate(15);
+        $query = Report::query()->with(['user', 'manager']);
 
-        return view('reports.index', compact('reports'));
+        if ($user->isAdmin()) {
+            // Admins review everyone's reports.
+        } elseif ($user->isManager()) {
+            $query->where('manager_id', $user->id);
+        } else {
+            $query->where('user_id', $user->id);
+        }
+
+        $this->applyUserFilter($query, $request);
+        $this->applyDateRange($query, $request, 'report_date');
+        $this->applyStatusFilter($query, $request);
+
+        $reports = $query->latest('report_date')->paginate(15)->withQueryString();
+
+        return view('reports.index', array_merge(
+            ['reports' => $reports],
+            $this->filterOptions($request),
+        ));
     }
 
     public function create(Request $request)
     {
+        $this->denyAdminEntry($request);
+
         return view('reports.create', [
             'report'   => new Report([
                 'report_date'  => now()->toDateString(),
@@ -51,6 +71,8 @@ class ReportController extends Controller
 
     public function store(Request $request)
     {
+        $this->denyAdminEntry($request);
+
         $data = $this->validated($request);
 
         $report = $request->user()->reports()->create($data);
